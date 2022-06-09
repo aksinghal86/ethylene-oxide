@@ -8,7 +8,10 @@ server <- function(input, output, session) {
   observe({
     req(input$mapdata_year)
 
-    rvs$emissions <- emissions %>% filter(year == input$mapdata_year)
+    rvs$emissions <- emissions %>% filter(year == input$mapdata_year) %>% 
+      filter(year == input$mapdata_year) %>% 
+      mutate(tooltip = paste0(site_name, '<br>', 
+                              year, ' emissions: ', round(total_emissions_epa, 1), ' lbs'))
     rvs$cancer <- cancer %>% 
       filter(year == input$mapdata_year) %>% 
       mutate(tooltip = paste0('Census tract #: ', geoid, '<br>', 
@@ -23,10 +26,10 @@ server <- function(input, output, session) {
   
   observe({ 
     req(input$mapdata_year)
-    req(rvs$emissions)
+    # req(rvs$emissions)
     req(rvs$cancer)
     
-    pal <- colorRamp(c("#A2A1A100", "#9E5353B3", "#9E0000E6"), alpha = T)((1:256)/256)
+    # pal <- colorRamp(c("#A2A1A100", "#9E5353B3", "#9E0000E6"), alpha = T)((1:256)/256)
     # pal[, 4] <- pal[, 4]*0.8
     
     mapdeck_update(map_id = 'map') %>% 
@@ -39,9 +42,10 @@ server <- function(input, output, session) {
         auto_highlight = T,
         highlight_colour = '#FFFFFF26',
         tooltip = 'tooltip',
-        stroke_colour = F,
-        stroke_width = 20,
-        legend = list(fill_colour = T, stroke_colour = F),
+        stroke_colour = 'plaintiff_tracts',
+        stroke_width = 50,
+        legend = F, 
+        # legend = list(fill_colour = T, stroke_colour = F),
         update_view = F,
         # colour_range = colourvalues::colour_values(1:6, palette = "plasma"),
         layer_id = 'cancer'
@@ -53,7 +57,7 @@ server <- function(input, output, session) {
     req(rvs$emissions)
     req(rvs$cancer)
 
-    pal <- colorRamp(c("#A2A1A14D", "#9E5353B3", "#9E0000E6"), alpha = T)((1:256)/256)
+    # pal <- colorRamp(c("#A2A1A14D", "#9E5353B3", "#9E0000E6"), alpha = T)((1:256)/256)
     # pal[, 4] <- pal[, 4]*0.8
 
     mapdeck_update(map_id = 'map') %>%
@@ -62,12 +66,13 @@ server <- function(input, output, session) {
         rvs$emissions,
         lat = 'latitude', 
         lon = 'longitude', 
-        radius = 250,
-        fill_opacity = 0.6,
+        radius = 750,
+        radius_min_pixels = 3,
+        fill_opacity = 0.8,
         # fill_colour = "total_emissions_epa",
         auto_highlight = T,
         highlight_colour = '#FFFFFF26',
-        tooltip = 'site_name',
+        tooltip = 'tooltip',
         stroke_colour = '#ECF307',
         stroke_width = 20,
         # legend = list(fill_colour = T, stroke_colour = F),
