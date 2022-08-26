@@ -8,7 +8,7 @@ ui <- navbarPage(
     
     # useShinyjs(), 
     # includeScript('script.js'),
-    div( tags$head(includeCSS('styles.css')) ),
+    div( tags$head(includeCSS('www/styles.css')) ),
     
     div(
       class = 'outer',

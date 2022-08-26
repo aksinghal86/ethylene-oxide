@@ -1,15 +1,12 @@
 library(shiny)
-
-library(here)
 library(tidyverse)
 library(sf)
 library(terra)
-
 library(mapdeck)
 
 # Data files
-emissions <- read_rds(here('data/processed/eto/combined-eto.rds'))
-cancer <- vect(here('data/processed/eto/neighbor-tracts.shp'))
+emissions <- read_rds('data/combined-eto.rds')
+cancer <- vect('data/neighbor-tracts.shp')
 
 plaintiff_tracts <- as.character(
   c(42077000101, 42077000102, 42077000400, 42077000500, 42077000600, 42077000700,

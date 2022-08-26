@@ -1,6 +1,9 @@
 # Data files
 data/
 
+# Environment files
+renv*
+
 # History files
 .Rhistory
 .Rapp.history
