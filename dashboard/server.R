@@ -8,7 +8,7 @@ server <- function(input, output, session) {
   observe({
     req(input$mapdata_year)
 
-    rvs$emissions <- emissions %>% filter(year == input$mapdata_year) %>% 
+    rvs$emissions_for_map <- emissions_for_map %>% 
       filter(year == input$mapdata_year) %>% 
       mutate(tooltip = paste0(site_name, '<br>', 
                               year, ' emissions: ', round(total_emissions_epa, 1), ' lbs'))
@@ -32,8 +32,8 @@ server <- function(input, output, session) {
     # pal <- colorRamp(c("#A2A1A100", "#9E5353B3", "#9E0000E6"), alpha = T)((1:256)/256)
     # pal[, 4] <- pal[, 4]*0.8
     
-    mapdeck_update(map_id = 'map') %>% 
-      clear_polygon('cancer') %>% 
+    mapdeck_update(map_id = 'map') %>%
+      clear_polygon('cancer') %>%
       add_polygon(
         rvs$cancer,
         fill_colour = "log_pt_cancer",
@@ -42,10 +42,10 @@ server <- function(input, output, session) {
         auto_highlight = T,
         highlight_colour = '#FFFFFF26',
         tooltip = 'tooltip',
-        stroke_colour = 'plaintiff_tracts',
+        # stroke_colour = '#FFFFFF',
         stroke_width = 50,
-        legend = F, 
-        # legend = list(fill_colour = T, stroke_colour = F),
+        legend = F,
+        # # legend = list(fill_colour = T, stroke_colour = F),
         update_view = F,
         # colour_range = colourvalues::colour_values(1:6, palette = "plasma"),
         layer_id = 'cancer'
@@ -54,7 +54,7 @@ server <- function(input, output, session) {
 
   observe({
     req(input$mapdata_year)
-    req(rvs$emissions)
+    req(rvs$emissions_for_map)
     req(rvs$cancer)
 
     # pal <- colorRamp(c("#A2A1A14D", "#9E5353B3", "#9E0000E6"), alpha = T)((1:256)/256)
@@ -63,9 +63,9 @@ server <- function(input, output, session) {
     mapdeck_update(map_id = 'map') %>%
       clear_scatterplot('facilities') %>%
       add_scatterplot(
-        rvs$emissions,
-        lat = 'latitude', 
-        lon = 'longitude', 
+        rvs$emissions_for_map,
+        lat = 'latitude',
+        lon = 'longitude',
         radius = 750,
         radius_min_pixels = 3,
         fill_opacity = 0.8,
@@ -73,11 +73,32 @@ server <- function(input, output, session) {
         auto_highlight = T,
         highlight_colour = '#FFFFFF26',
         tooltip = 'tooltip',
-        stroke_colour = '#ECF307',
+        # stroke_colour = '#ECF307',
         stroke_width = 20,
-        # legend = list(fill_colour = T, stroke_colour = F),
+        # # legend = list(fill_colour = T, stroke_colour = F),
         update_view = F,
         layer_id = 'facilities'
       )
+  })
+  
+  output$emissions_plot <- renderGirafe({
+    req(input$site_name) 
+    
+    plotdata <- emissions_for_plot %>% 
+      filter(site_name %in% input$site_name) %>% 
+      mutate(tooltip = paste(round(emissions), 'lbs'))
+    
+    plt <- ggplot(plotdata, aes(x = year, y = emissions, color = site_name)) + 
+      geom_point_interactive(aes(tooltip = tooltip, data_id = site_name), size = 3) + 
+      geom_textline(aes(label = site_name), size = 3, vjust = -0.5, text_smoothing = 30) +
+      labs(x = 'Year', y = 'Emissions (lbs)') +
+      theme_bw() +
+      theme(legend.position = 'none')
+    
+    girafe(
+      ggobj = plt, 
+      options = list(opts_hover_inv(css = 'opacity: 0.3;'), 
+                     opts_selection(type = 'single'))
+    )
   })
 }
