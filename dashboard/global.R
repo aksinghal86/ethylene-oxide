@@ -3,7 +3,7 @@ library(tidyverse)
 library(ggiraph) 
 library(geomtextpath)
 library(sf)
-library(terra)
+# library(terra)
 library(mapdeck)
 library(reactable)
 
