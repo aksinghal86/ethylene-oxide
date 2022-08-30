@@ -101,4 +101,85 @@ server <- function(input, output, session) {
                      opts_selection(type = 'single'))
     )
   })
+  
+  output$table <- renderReactable({
+    site_cols <- c("site_name", "city", "state", "census_tract", "year")
+    emissions_cols <- c("reported_emissions", "emissions_source") 
+    cancer_cols <- c('est_pt_cancer', 'cancer_source') 
+    
+    make_color_pal <- function(colors, bias = 1) { 
+      get_color <- colorRamp(colors, bias = bias) 
+      function(x) rgb(get_color(x), maxColorValue = 255)
+    }
+    
+    emissions_color <- make_color_pal(c("#ff2700", "#f8fcf8", "#44ab43"), bias = 3)
+    
+    cancer_color <- function(value) { 
+      case_when(
+        value >= 100 ~ '#E74C3C', 
+        between(value, 1, 100) ~ '#D4AC0D', 
+        value < 1 ~ '#229954'
+      )
+    }
+    
+    reactable(
+      emissions_for_table,
+      striped = T,
+      compact = T, 
+      searchable = T, 
+      showSortIcon = F,
+      filterable = T,
+      pagination = T, 
+      defaultSorted = c("site_name", "year"), 
+      defaultPageSize = 20,
+      columnGroups = list(
+        colGroup(name = 'Site', columns = site_cols), 
+        colGroup(name = 'Emissions', columns = emissions_cols), 
+        colGroup(name = 'Cancer', columns = cancer_cols)
+      ), 
+      defaultColDef = colDef(
+        vAlign = 'center', 
+        headerVAlign = 'bottom', 
+        class = 'cell', 
+        headerClass = 'table-header'
+      ),
+      columns = list(
+        site_name = colDef(
+          name = 'Name', 
+          minWidth = 250,
+          class = 'table-site-name'
+        ), 
+        emissions_source = colDef(
+          name = 'Emissions Source'
+        ), 
+        cancer_source = colDef(
+          name = 'Cancer source', 
+        ),
+        reported_emissions = colDef(
+          name = "Emissions<br>(lbs)",
+          cell = function(value) { 
+            gemissions <- log(emissions_for_table$reported_emissions[!is.na(emissions_for_table$reported_emissions)])
+            scaled <- 1 - (log(value) - min(gemissions)) / (max(gemissions) - min(gemissions))
+            color <- emissions_color(scaled)
+            value <- format(round(value))
+            div(class = 'table-emissions', style = list(background = color), value)
+          },
+          html = T, 
+          class = 'border-left'
+        ), 
+        est_pt_cancer = colDef(
+          name = "Cancer Risk<br>(per million)", 
+          cell = function(value) { 
+            color <- cancer_color(value)
+            value <- format(round(value))
+            div(class = 'table-cancer', style = list(background = color), value)  
+          },
+          html = T, 
+          class = 'border-left'
+        )
+      ), 
+      borderless = T, 
+      class = 'emissions-table'
+    )  
+  })
 }

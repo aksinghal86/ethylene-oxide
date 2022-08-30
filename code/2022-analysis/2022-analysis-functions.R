@@ -287,9 +287,9 @@ get_pollutant_data <- function(pollutants, years, with_tri = F, with_cancer = F)
 }
 
 ## Spatial functions -----------------------------------------------------------
-spatialize_tracts <- function(dat, tracts_file = 'data/processed/shape-files/census-tracts.shp') { 
+spatialize_tracts <- function(dat, tracts_file = 'data/processed/shape-files/census-tracts.shp', colname = 'census_tract') { 
   tracts <- terra::vect(tracts_file)
-  sp_dat <- terra::merge(tracts[, c('geoid')], dat, by.x = 'geoid', by.y = 'census_tract')
+  sp_dat <- terra::merge(tracts[, c('geoid')], dat, by.x = 'geoid', by.y = colname)
   rm(tracts)
   gc()
   return(sp_dat)

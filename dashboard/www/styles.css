@@ -13,10 +13,10 @@ input[type = 'number'] {
 }
 
 /* Customize fonts */
-  body, label, input, button, select, text { 
-    font-family: Karla, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: 250;
-  }
+body, label, input, button, select, text { 
+  font-family: Karla, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 250;
+}
 
 h1, h2, h3, h4, h5 { font-weight: 400; }
 
@@ -25,27 +25,27 @@ hr {
 }
 
 /* TABS */
-  .tab-pane .active {
-    border-radius: 5px;
-    /* cursor: pointer;
-    transition: 0.3s; */
-  }
+.tab-pane .active {
+  border-radius: 5px;
+  /* cursor: pointer;
+  transition: 0.3s; */
+}
 
 #smrytabs { 
-font-size: 14px;;
+  font-size: 14px;;
 }
 
 /* PANELS */
   
-  /* Navigation Panel */
-  #controls { 
-  /* Appearance */
+/* Navigation Panel */
+#controls { 
+/* Appearance */
   border-radius: 5px;
-background-color: white; 
-padding: 0 20px 20px 20px; 
-cursor: move;
-zoom: 0.95;
-font-size: 14px; 
+  background-color: white; 
+  padding: 0 20px 20px 20px; 
+  cursor: move;
+  zoom: 0.95;
+  font-size: 14px; 
 /* Fade out while not hovering */
   /*opacity: 0.65;
 
@@ -54,27 +54,25 @@ transition: opacity 500ms 1s;
   }
 
 #controls .shiny-input-container { 
-width: 100%;
+  width: 100%;
 }
 
 
-
 /* TABLES */
-  .cell { 
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-    text-align: center;
-    position: relative;
-  }
+.emissions-table { 
+  margin: 0px 50px 0px 50px;
+  font-size: 1.1rem;
+}
+
 
 .table-header {
   color: #bbb;
-    color: hsl(0, 0%, 45%);
+  color: hsl(0, 0%, 45%);
   font-weight: 700;
-  font-size: 16px;
+  font-size: 1.1rem;
   letter-spacing: 0.4px;
   text-transform: uppercase;
+  text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -84,24 +82,63 @@ width: 100%;
 .table-header[aria-sort='ascending'],
 .table-header[aria-sort='descending'] {
   color: #bbb;
-    color: hsl(0, 0%, 5%);
+  color: hsl(0, 0%, 5%);
 }
 
-.girafe_container_std div {
-  line-height: 0;
+.table-site-name {
+  margin-left: 0.5rem;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  font-weight: 700;
 }
+
+.table-emissions{ 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+}
+
+.table-cancer{ 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 75%;
+  color: #000;
+  font-size: 1.1rem;
+  letter-spacing: -1px;
+}
+
+.border-left { 
+  border-left: 2px solid #555;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.cell { 
+  font-weight: 500;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  text-align: center;
+  }
 
 /* Position and style citation */
-  #cite { 
+#cite { 
   margin: auto;
-text-align: center;
-position: absolute;
-bottom: 5px; 
-width: 100%;
-font-size: 14px;
+  text-align: center;
+  position: absolute;
+  bottom: 5px; 
+  width: 100%;
+  font-size: 14px;
 }
 
 
 #mapdecktooltipmap { 
-font-size: 14px;
+  font-size: 14px;
+}
+
+
+
+.girafe_container_std div {
+  line-height: 0;
 }

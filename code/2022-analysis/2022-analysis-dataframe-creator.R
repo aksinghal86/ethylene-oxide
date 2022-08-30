@@ -1,6 +1,10 @@
 library(tidyverse)
 source('code/2022-analysis/2022-analysis-functions.R')
 
+## Census tract files (
+tracts <- census_tract_geometries()
+terra::writeVector(tracts, 'data/processed/shape-files/census-tracts.shp', overwrite = T)
+
 ## Emissions data --------------------------------------------------------------
 #TRI ETO data (from 2014 to 2020)
 tri <- get_tri_emissions('ethylene oxide', 2014:2020) 
@@ -22,6 +26,7 @@ arrow::write_parquet(cancer, 'data/processed/eto/epa-eto-cancer-all-tracts.parqu
 ## Combined emissions and cancer data ------------------------------------------
 eto <- get_pollutant_data('ethylene oxide', 2014:2020, with_tri = T, with_cancer = T)
 write_rds(eto, 'data/processed/eto/combined-eto.rds')
+write_rds(eto, 'dashboard/data/combined-eto.rds')
 
 ## Neighboring census tracts ---------------------------------------------------
 eto <- read_rds('data/processed/eto/combined-eto.rds') %>% 
@@ -33,9 +38,11 @@ cancer <- arrow::read_parquet('data/processed/eto/epa-eto-cancer-all-tracts.parq
 
 nbrs <- neighbor_tracts(eto, cancer, parallel = F, within = 25)
 terra::writeVector(nbrs, 'data/processed/eto/neighbor-tracts.shp', overwrite = T)
+terra::writeVector(nbrs, 'dashboard/data/neighbor-tracts.shp', overwrite = T)
 
-
-
+## Estimated emissions for intervening years
+eto <- read_rds('data/processed/eto/combined-eto.rds')
+sp_nbrs <- st_read('data/processed/eto/')
 
 
 # 
