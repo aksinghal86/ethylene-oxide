@@ -1,5 +1,13 @@
-# Data files
+# Data and output files
 data/
+code/emissions-vs-bkg/data/
+code/emissions-vs-bkg/out/
+code/epi-analysis/data/
+
+dashboard/rsconnect/
+
+# cache
+rosm.cache/
 
 # Environment files
 renv*

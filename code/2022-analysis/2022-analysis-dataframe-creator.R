@@ -40,11 +40,6 @@ nbrs <- neighbor_tracts(eto, cancer, parallel = F, within = 25)
 terra::writeVector(nbrs, 'data/processed/eto/neighbor-tracts.shp', overwrite = T)
 terra::writeVector(nbrs, 'dashboard/data/neighbor-tracts.shp', overwrite = T)
 
-## Estimated emissions for intervening years
-eto <- read_rds('data/processed/eto/combined-eto.rds')
-sp_nbrs <- st_read('data/processed/eto/')
-
-
 # 
 # ## Old code --------------------------------------------------------------------
 # #### Combine ETO data ---------------------------------------------------------
