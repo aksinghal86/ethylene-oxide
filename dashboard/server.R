@@ -3,67 +3,42 @@ server <- function(input, output, session) {
   
   
   #### Create data sets and update UI components--------------------------------
-  rvs <- reactiveValues()
-  
-  observe({
+
+  emissions_update <- reactive({
     req(input$mapdata_year)
 
-    rvs$emissions_for_map <- emissions_for_map %>% 
-      filter(year == input$mapdata_year) %>% 
-      mutate(tooltip = paste0(site_name, '<br>', 
+    emissions_for_map %>%
+      filter(year == input$mapdata_year) %>%
+      mutate(tooltip = paste0(site_name, '<br>',
                               year, ' emissions: ', round(total_emissions_epa, 1), ' lbs'))
-    rvs$cancer <- cancer %>% 
-      filter(year == input$mapdata_year) %>% 
-      mutate(tooltip = paste0('Census tract #: ', geoid, '<br>', 
+  }) %>%
+    bindCache(input$mapdata_year)
+
+  cancer_update <- reactive({
+    req(input$mapdata_year)
+
+    cancer %>%
+      filter(year == input$mapdata_year) %>%
+      mutate(tooltip = paste0('Census tract #: ', geoid, '<br>',
                               'Pt Cancer Risk: ', round(pt_cancer_, 1), ' per million'))
-  })
+
+  }) %>%
+    bindCache(input$mapdata_year)
   
   output$map <- renderMapdeck({ 
-    token = "pk.eyJ1IjoiYWtzaW5naGFsODgiLCJhIjoiY2tuZHgyeWxyMWEycDJwbzB1dDBqMGR0NiJ9.XFjK_TTS-nKfFYkQY70wIQ"
+    token <- read_lines('assets/mapdeck-token.txt')
     mapdeck(style = mapdeck_style('dark'), token = token) %>%
       mapdeck_view(location = c(-100, 40), zoom = 4, pitch = 10)
   })
   
-  observe({ 
-    req(input$mapdata_year)
-    # req(rvs$emissions)
-    req(rvs$cancer)
-    
-    # pal <- colorRamp(c("#A2A1A100", "#9E5353B3", "#9E0000E6"), alpha = T)((1:256)/256)
-    # pal[, 4] <- pal[, 4]*0.8
-    
-    mapdeck_update(map_id = 'map') %>%
-      clear_polygon('cancer') %>%
-      add_polygon(
-        rvs$cancer,
-        fill_colour = "log_pt_cancer",
-        palette = 'orrd',
-        fill_opacity = 0.6,
-        auto_highlight = T,
-        highlight_colour = '#FFFFFF26',
-        tooltip = 'tooltip',
-        # stroke_colour = '#FFFFFF',
-        stroke_width = 50,
-        legend = F,
-        # # legend = list(fill_colour = T, stroke_colour = F),
-        update_view = F,
-        # colour_range = colourvalues::colour_values(1:6, palette = "plasma"),
-        layer_id = 'cancer'
-      )
-  })
-
   observe({
     req(input$mapdata_year)
-    req(rvs$emissions_for_map)
-    req(rvs$cancer)
-
-    # pal <- colorRamp(c("#A2A1A14D", "#9E5353B3", "#9E0000E6"), alpha = T)((1:256)/256)
-    # pal[, 4] <- pal[, 4]*0.8
-
+    req(emissions_update())
+    
     mapdeck_update(map_id = 'map') %>%
       clear_scatterplot('facilities') %>%
       add_scatterplot(
-        rvs$emissions_for_map,
+        emissions_update(),
         lat = 'latitude',
         lon = 'longitude',
         radius = 750,
@@ -78,6 +53,30 @@ server <- function(input, output, session) {
         # # legend = list(fill_colour = T, stroke_colour = F),
         update_view = F,
         layer_id = 'facilities'
+      )  
+  })
+  
+  observe({ 
+    req(input$mapdata_year)
+    req(cancer_update())
+    
+    mapdeck_update(map_id = 'map') %>%
+      clear_polygon('cancer') %>%
+      add_polygon(
+        cancer_update(),
+        fill_colour = "log_pt_cancer",
+        palette = 'orrd',
+        fill_opacity = 0.6,
+        auto_highlight = T,
+        highlight_colour = '#FFFFFF26',
+        tooltip = 'tooltip',
+        # stroke_colour = '#FFFFFF',
+        stroke_width = 50,
+        legend = F,
+        # # legend = list(fill_colour = T, stroke_colour = F),
+        update_view = F,
+        # colour_range = colourvalues::colour_values(1:6, palette = "plasma"),
+        layer_id = 'cancer'
       )
   })
   
@@ -181,5 +180,6 @@ server <- function(input, output, session) {
       borderless = T, 
       class = 'emissions-table'
     )  
-  })
+  }) %>% 
+    bindCache(input$year) # bindCache requires an input. This is just a fake one.
 }

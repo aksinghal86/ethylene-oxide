@@ -6,6 +6,8 @@ code/epi-analysis/data/
 
 dashboard/rsconnect/
 
+code/emissions-vs-bkg/assets/
+
 # cache
 rosm.cache/
 

@@ -7,6 +7,10 @@ library(sf)
 library(mapdeck)
 library(reactable)
 
+shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "eto-explorer-app-cache")))
+shinyOptions(cache = cachem::cache_disk("./eto-explorer-app-cache"))
+             
+
 # Data files
 emissions <- read_rds('data/combined-eto.rds') 
 cancer <- st_read('data/neighbor-tracts.shp')

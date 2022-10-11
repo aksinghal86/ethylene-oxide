@@ -21,7 +21,7 @@ source('code/2022-analysis/2022-analysis-functions.R')
 cancer <- read_csv('code/emissions-vs-bkg/data/cancer-2017.csv') 
 
 # Estimate ethylene oxide exposure concentration from cancer using EPA's IUR for 
-# EtO of 9.1e-3 per ppb
+# EtO of 5.0e-3 per ug/m3
 
 
 # the best estimate for ambient air ethylene oxide concentrations for the year 2017 
@@ -36,11 +36,13 @@ bkg <- 0.297
 
 cancer <- cancer %>% 
   mutate(pt_cancer_risk = ifelse(pt_cancer_risk == 0, sort(unique(pt_cancer_risk))[2], pt_cancer_risk), 
-         ec = pt_cancer_risk * 1e-6 / 9.1e-3, 
+         ec = pt_cancer_risk * 1e-6 / 5.0e-3, 
          bkg = bkg, 
          pct_contribution = ec/bkg*100, 
          log_pct_contribution = log(pct_contribution)) %>% 
-  filter(!epa_region == 'Entire US')
+  filter(!epa_region == 'Entire US', !county == 'Entire State')
+# sp_cancer <- spatialize_tracts(cancer)
+# terra::writeVector(sp_cancer, 'code/emissions-vs-bkg/data/sp_cancer.shp', overwrite = T)
 
 mainland_cancer <- cancer %>% filter(!state %in% c('AK', 'HI', 'VI', 'PR'))
 ak_cancer <- cancer %>% filter(state == 'AK') 
@@ -60,35 +62,42 @@ sp_dfs <- list(mainland_cancer, ak_cancer, hi_cancer, vi_cancer, pr_cancer) %>%
 names(sp_dfs) <- c('Mainland USA', 'Alaska', 'Hawaii', 'Virgin Islands', 'Puerto Rico')
 
 
-create_map <- function(sp_df, name, trans = 'log') {
-  pal <- colorRampPalette(c('#3a2f6b', '#36669c', '#41a0ae', '#3ec995', '#77f07f'))
-
+create_map <- function(sp_df, name, trans = 'log10') {
+  labels <- if (trans == 'log10') scales::number_format(accuracy = 0.00001) else scales::number_format(accuracy = 1)
+  # pal <- colorRampPalette(c('#3a2f6b', '#36669c', '#41a0ae', '#3ec995', '#77f07f'))
+  pal <- colorRampPalette(rev(RColorBrewer::brewer.pal(name = 'Greens', 7)))
   ggplot() + 
     geom_sf(data = sp_df, aes(fill = pct_contribution), color = NA) +
     theme_minimal() + 
     scale_fill_gradientn(trans = trans, 
-                         colors = pal(10), 
+                         colors = pal(5), 
+                         limits = c(1e-5, 50), 
                          name = '% contribution', 
-                         labels = scales::number_format(accuracy = 0.001)) +
+                         labels =  labels) +
     labs(title = '% contribution of emissions relative to background emissions', 
          subtitle = name) + 
     annotation_scale(location = 'bl') +
-    annotation_north_arrow(location = "br", which_north = "true", style = north_arrow_fancy_orienteering) 
+    annotation_north_arrow(location = "br", which_north = "true", style = north_arrow_fancy_orienteering) +
+    theme(plot.title.position = 'plot', 
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          axis.text = element_blank())
 }
 
 ## Test (unhash to run)
 # pr <- sp_dfs$`Puerto Rico`
-# create_map(pr, 'Puerto Rico', trans = 'identity') 
-# create_map(pr, 'Puerto Rico', trans = 'log') 
+# create_map(pr, 'Puerto Rico', trans = 'identity')
+# create_map(pr, 'Puerto Rico', trans = 'log10')
 
 maps <- map2(sp_dfs, names(sp_dfs), create_map)
-fnames <- paste0('code/emissions-vs-bkg/out/', names(sp_dfs), ' log scale.pdf')
-walk2(fnames, maps, ggsave, height = 8, width = 8)
+fnames <- paste0('code/emissions-vs-bkg/out/', names(sp_dfs), ' log scale.png')
+walk2(fnames, maps, ggsave, width = 8, bg = 'white')
+walk(fnames, knitr::plot_crop)
 
 maps <- map2(sp_dfs, names(sp_dfs), create_map, trans = 'identity')
-fnames <- paste0('code/emissions-vs-bkg/out/', names(sp_dfs), ' identity.pdf')
-walk2(fnames, maps, ggsave, height = 8, width = 8)
-
+fnames <- paste0('code/emissions-vs-bkg/out/', names(sp_dfs), ' identity.png')
+walk2(fnames, maps, ggsave, width = 8)
+walk(fnames, knitr::plot_crop)
 
 
 

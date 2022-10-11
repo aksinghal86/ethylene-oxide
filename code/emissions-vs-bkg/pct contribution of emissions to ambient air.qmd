@@ -1,0 +1,345 @@
+---
+title: "Contribution of Ethylene Oxide Emissions to Ambient Air Concentrations"
+author: "Ankur Singhal, David Macintosh"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    theme: pulse
+    fontsize: 1.1em
+    linestretch: 1.7
+    toc: false
+    # css: styles.css
+editor: source
+cap-location: margin
+# reference-location: margin
+citation-location: margin
+execute: 
+  cache: true
+  echo: false
+---
+
+```{css, echo=FALSE}
+caption {
+  color: #848484;
+  font-size: 1rem;
+}
+
+.carousel {
+  height: 400px; 
+  width: 100%;
+  padding-top: 1rem; 
+  padding-bottom: 1rem;
+}
+
+.carousel-caption { 
+  bottom: -1.5rem;
+  padding-bottom: 0rem;
+}
+
+/* For images */
+.d-block { 
+  max-width: 70%;
+  max-height: 400px;
+}
+
+.border { 
+  border: 0px !important;
+}
+
+body { 
+  font-family: "Roboto", "Raleway", "Helvetica", sans-serif;
+}
+```
+
+```{r setup}
+#| include: false
+#| echo: false
+#| warning: false
+#| message: false
+library(tidyverse)
+library(flextable)
+
+knitr::opts_chunk$set(echo = FALSE)
+
+cancer <- read_csv(here::here('code/emissions-vs-bkg/data/cancer-2017.csv')) %>% 
+  filter(!is.na(pt_cancer_risk), 
+         !county %in% c('Entire US', 'Entire State'))
+```
+
+Recently, EPA estimated cancer risk in each of the 76,000+ census tracts in the US based on emissions of various chemicals, including [ethylene oxide](https://www.epa.gov/hazardous-air-pollutants-ethylene-oxide) (EtO), as part of its [Air Toxics Screening Assessment](https://www.epa.gov/AirToxScreen) (AirToxScreen). This report is the latest update to a triennial analysis formerly known as the [National Air Toxics Assessment](https://www.epa.gov/national-air-toxics-assessment) (NATA). To estimate cancer risk, EPA relies upon air emissions data reported by permitted facilities, air dispersion models, and its own hazard characterization parameters. For the latest iteration, EPA used emissions data reported for 2017 and released its findings in Spring 2022.[^citing]
+
+[^citing]: In this article, NATA and AirToxScreen always refer to the analysis released by EPA in 2017 and 2022, respectively.
+
+In 2017, EPA estimated that nearly 12,000 census tracts were at elevated cancer risk from EtO exposures and, in 2022, that number dropped marginally to approximately 11,000 census tracts. These census tracts were projected by EPA to have cancer risk above one in a million, a common benchmark for managing risks of potential carcinogens in community settings, from EtO exposures. The high number of census tracts affected by EtO emissions is primarily due to the updated cancer slope factor[^csf] that [EPA developed in 2016](https://cfpub.epa.gov/ncea/iris_drafts/recordisplay.cfm?deid=329730). The cancer slope factor is an interesting topic unto itself, but regardless of its strengths and weaknesses, the latest EtO-related cancer risks presented in the latest AirToxScreen are in a range that typically results in action from EPA, state, or local government.
+
+[^csf]: Cancer slope factor (CSF), a theoretical estimate of cancer risk at low dose exposures at which humans are typically exposed to, is used for carcinogens in risk assessment when there are no data available at the relevant low dose concentrations. Typically, a straight line is drawn from the lowest of the high dose group (also known as the point of departure or POD) to zero. The slope of the line is referred to as the cancer slope factor. In simpler terms, cancer slope factor tells the risk assessor the rate at which cancer risk is expected to increase for every unit increase in the exposure to the contaminant. So, for example, a CSF of 5.0E-3 per µg/m<sup>3</sup> for EtO indicates that the risk of cancer theoretically increases by 0.0050 (or 0.5%) for every µg/m<sup>3</sup> unit increase in EtO concentration in the air. The higher the cancer slope factor, the higher the estimated risk of getting cancer.
+
+The cancer risks of EtO estimated by EPA have numerous interesting characteristics, one of which is the magnitude of the modeled EtO concentrations in comparison to ambient, sometimes referred to as background, levels of EtO in outdoor air. EtO is present in the atmosphere around the globe, including locations far from industrial sources of emissions. This ambient EtO has two primary sources — naturally occurring chemical reactions that form EtO from other chemicals and tailpipe emissions from motor vehicles powered by fossil fuels and internal combustion engines. Notably, neither of those sources are related to EtO emissions from industrial sources, but because of their wide distribution, every person in the US is exposed to ambient EtO.[^endo] AirToxScreen does not account for exposure to ambient levels of EtO which means the risk associated with the modeled EtO emissions are not placed in their full context. 
+
+[^endo]: People are also exposed to ethylene oxide produced by their own metabolism. This self-produced or endogenous EtO is present in the lungs and exhaled while breathing. Endogenous ethylene oxide will be the subject of a future post. 
+
+To tease out the contribution from ambient air vs emissions from facilities, we asked the following questions:
+
+1.  What is the exposure concentration of ethylene oxide for each census tract in the US estimated by AirToxScreen?; and
+2.  How does the AirToxScreen exposure concentration compare to ambient ethylene oxide concentrations present in outdoor air of the US?
+
+## Estimation of AirToxScreen exposure concentrations
+
+EPA estimates cancer risk using the following equation:
+
+$$ R = EC \times CSF $$
+
+where, R = cancer risk (per million people for this scenario); EC = exposure concentration (in µg/m<sup>3</sup>); and CSF = cancer slope factor (in (µg/m<sup>3</sup>)<sup>-1</sup>). Given point cancer risk, i.e., risk specifically from ethylene oxide, in a certain census tract from AirToxScreen and a CSF  of 5.0E-3 µg/m<sup>3</sup> that EPA derived in 2016, one can estimate the exposure concentration that EPA used to derive its cancer risk for each census tract.
+
+For example, the table below shows cancer risk and the corresponding exposure concentrations for the 15 census tracts with the highest estimated cancer risk in AirToxScreen.
+
+
+
+```{r top15table}
+#| echo: false
+#| align: center
+
+set_flextable_defaults(
+  font.size = 10, theme_fun = theme_vanilla, padding = 6, background.color = "#F9F9F9"
+)
+
+csf <- 5.0e-3
+cancer <- cancer %>% 
+  mutate(ec = pt_cancer_risk * 1e-6 / csf)
+cancer %>% 
+  arrange(desc(pt_cancer_risk)) %>% 
+  select(-epa_region, -fips, -population, -pollutant, -units, -total_cancer_risk, -year) %>% 
+  mutate(pt_cancer_risk = round(pt_cancer_risk), 
+         ec = round(ec, 3)) %>% 
+  slice(1:15) %>%
+  flextable() %>% 
+  merge_v(j = 1) %>% 
+  valign(j = 1, valign = 'top') %>% 
+  set_caption(caption = 'Cancer risk and corresponding exposure concentration in 15 census tracts with highest estimated cancer risk') %>% 
+  set_header_labels(state = 'State', county = 'County', census_tract = 'Census tract #', 
+                    pt_cancer_risk = "Point cancer risk\n(per million people)", ec = "Exposure concentration\n(\u00b5g/m\u00b3)") %>% 
+  set_table_properties(layout = 'autofit', width = 0.8) %>%  
+  line_spacing(space = 0.5) %>% 
+  footnote(i = 1, j = 4:5, ref_symbols = c('a', 'b'), part = 'header', 
+           value = as_paragraph(
+             c('Point cancer risk is the risk estimated by EPA in AirToxScreen specifically for ethylene oxide',
+               'Exposure concentration is point cancer risk divided by cancer slope factor (5.0E-3 per \u00b5g/m\u00b3)'))) 
+```
+
+In these census tracts, cancer risk from ethylene oxide ranges from 178 additional cases per million people to 681 cases per million. Corresponding exposure concentration ranges from 0.036 to 0.136 µg/m<sup>3</sup>. 
+
+## Comparison to ambient air concentrations
+
+EPA monitors [ethylene oxide in ambient air](https://aqs.epa.gov/aqsweb/airdata/download_files.html#Annual) in multiple monitoring stations located around the US as part of its [National Air Toxics Trends Stations](https://www.epa.gov/amtic/air-toxics-ambient-monitoring#natts) (NATTS) and [Urban Air Toxics Monitoring Program](https://www.epa.gov/amtic/air-toxics-ambient-monitoring#uatm) (UATMP) networks. Since the cancer risks for AirToxScreen were calculated using data reported in 2017, the most appropriate year would have been 2017. However, to our knowledge, EPA did not either collect or report ethylene oxide during that year. Therefore, we used the data for the following year using the data [EPA reported itself](https://www.epa.gov/sites/default/files/2019-11/documents/data_summary_stations.pdf). According to EPA analysis of ambient air ethylene oxide data collected between October 1, 2018 and March 31, 2019, concentrations ranged from 0.185 to 0.397 µg/m<sup>3</sup> with a mean ambient air ethylene oxide concentration of 0.297 µg/m<sup>3</sup>.
+
+This means that ambient air ethylene oxide concentration for the 15 census tracts above is 2.2 to 8.3 times higher than the contributions from emitting facilities. The graph below illustrates the relatively small contribution of emissions compared to ambient air ethylene oxide concentrations.
+
+```{r top 15 chart}
+#| echo: false
+#| fig-align: center
+#| warning: false
+#| message: false
+#| label: fig-charts1
+#| fig-cap: Exposure concentration for 15 census tracts with highest point cancer risk from EtO emitted from commercial facilities. As estimated by EPA as part of AirToxScreen.
+bkg <- 0.297
+cancer <- cancer %>% mutate(bkg = bkg, pct_contribution = ec/bkg*100)
+cancer %>% 
+  arrange(desc(pt_cancer_risk)) %>% 
+  slice(1:15) %>% 
+  ggplot(aes(y = reorder(census_tract, ec), x = ec)) + 
+  geom_bar(stat = 'identity', fill = 'cyan4', alpha = 0.9)+ 
+  geom_vline(xintercept = bkg, color = 'firebrick4', linetype = 'dashed', size = 1) + 
+  geom_text(aes(label = paste0(county, ', ', state)), hjust = -0.1) +
+  annotate(geom = 'curve', xend = 0.295, y = 10, x = 0.25, yend = 7, curvature = 0.3, arrow = arrow(length = unit(3, 'mm')), size = 1, color = 'firebrick4') + 
+  annotate(geom = 'text', x = 0.275, y = 11, label = 'Ambient air', hjust = 1, size = 4, color = 'firebrick4') + 
+  labs(title = expression(paste('Exposure concentration (', µg/m^3, ') by census tract')), 
+       subtitle = '15 census tracts with highest estimated point cancer risk from EtO', x = NULL, y = NULL) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        # panel.grid.major = element_blank(), 
+        panel.border = element_blank(), 
+        plot.title.position = 'plot', 
+        text = element_text(size = 12))
+```
+
+Even in census tracts with highest estimated point cancer risk, concentrations due to industrial emissions are minor relative to ambient air concentrations. The map below shows relative contribution from emissions compared to ambient air concentration by census tract for the entire US. 
+
+
+```{r map images}
+#| echo: false 
+#| classes: '.g-col-lg-6 .g-col-12 .g-col-md-12'
+#| label: fig-charts2
+#| fig-cap: Percent contribution of EtO from emissions relative to ambient air in the US
+source("carousel.R")
+carousel("gallery-carousel", 10000, yaml::yaml.load_file("carousel.yml")) 
+```
+
+
+Emissions from facilities add small amounts of concentration to the background or ambient air concentrations. In 90% of the census tracts, emissions from facilities contribute less than 0.1% to the total ambient air ethylene oxide concentration. In other words, ambient air ethylene oxide concentration comprises of 99.9% of the ethylene oxide concentration in 90% of the census tracts. And in 99.9% of the census tracts, ambient air ethylene oxide makes up 96% of total ethylene oxide.   
+
+
+```{r}
+#| echo: false
+states <- data.frame(state = c(datasets::state.abb, 'PR', 'VI'), 
+                     state_name = c(datasets::state.name, 'Puerto Rico', 'Virgin Islands'))
+cancer <- cancer %>% 
+  left_join(states, by = 'state') %>% 
+  mutate(pt_cancer_risk = round(pt_cancer_risk))
+```
+
+```{r}
+#| echo: false
+#| cache: false
+ojs_define(cancer = cancer,  
+           states = c('All US', sort(unique(cancer$state_name))))
+```
+
+::: {.column-margin}
+
+Use this plot to see percent contribution of emissions relative to ambient air ethylene oxide. 
+
+```{ojs}
+//| echo: false
+//| column: margin
+viewof state = Inputs.select(states, {
+  label: 'State',
+  multiple: false
+});
+
+viewof scale = Inputs.checkbox(['log scale']);
+```
+
+:::
+
+```{ojs results}
+//| echo: false
+//| column: page
+
+filtered = transpose(cancer).filter( function(d) {
+  if (state == 'All US') { 
+    return d.state;
+  } else { 
+    return state == d.state_name;
+  }
+});
+
+Plot.plot({ 
+  x: { 
+    grid: false,
+    label: 'Contribution to ambient air (%) →',
+    type: scale == 'log scale' ? 'log' : 'linear',
+  }, 
+  y: { 
+    ticks: null, 
+  },
+  marks: [
+    Plot.ruleX([100], { 
+      stroke: '#922828', 
+      strokeWidth: 2, 
+      strokeDasharray: 5,
+    }),
+    Plot.dot(filtered, { 
+      x: "pct_contribution" , 
+      y: d3.randomUniform(), 
+      title: (d) => `${d.county}, ${d.state} \n Exposure concentration: ${d.ec} \n Point cancer risk: ${d.pt_cancer_risk}`, 
+      r: 5,
+      // fill: "pct_contribution", 
+      stroke: '#ddd', 
+      strokeOpacity: 0.24, 
+      fill: '#189595', 
+      fillOpacity: 0.6,
+    })
+  ],
+  // color: {
+  //   scheme: "Greens"
+  // },
+  tooltip: { 
+    fill: "blue", 
+    stroke: "purple", 
+    r: 7
+  }, 
+  style: { 
+    pointerEvents: "all",
+  }
+});
+```
+
+
+```{r}
+#| include: false
+#| echo: false
+#| warning: false
+#| message: false
+#| layout-ncol: 2
+#| label: fig-charts3
+#| fig-cap: \% contribution of industrial ethylene oxide emissions to ambient air concentration (for all US including territories)
+#| fig-subcap:
+#|  - ''
+#|  - ''
+
+ggplot(cancer %>% arrange(desc(pct_contribution)) %>% slice(1:10000), aes(x = pct_contribution, y = 1)) +
+  geom_jitter(aes(color = state), alpha = 0.5, height = 4) +
+  scale_x_log10() +
+  theme_bw() +
+  theme(legend.position = 'none')
+
+ggplot(cancer, aes(x = pct_contribution)) +
+  stat_ecdf(size = 1, color = 'cyan4') +
+  scale_x_log10(label = scales::comma) +
+  annotation_logticks(sides = 'b') +
+  labs(x = '% contribution (log scale)',
+       y = 'Cumulative probability') +
+  theme_minimal() +
+  theme(plot.title.position = 'plot',
+        text = element_text(size = 14))
+
+ggplot(cancer, aes(x = pct_contribution)) +
+  geom_histogram(fill = 'cyan4', color = 'lightgrey') +
+  scale_x_log10(label = scales::comma) +
+  annotation_logticks(sides = 'b') +
+  labs(x = '% contribution (log scale)',
+       y = 'Frequency') +
+  theme_minimal() +
+  theme(plot.title.position = 'plot',
+         text = element_text(size = 14))
+```
+
+Given that ethylene oxide is produced endogenously as part of exhaled breath and is a component of combustion sources, it is possible that background exposures in the indoor environment are even higher than ambient air exposures, which would make the overall contribution from emissions even smaller. 
+
+The question becomes: how can a risk assessor meaningfully assess risk from emissions when the resultant concentration is 4,500 times less than (<1%) the ambient air concentration?
+
+
+## Comparison to other naturally occurring contaminants
+
+There are other naturally occurring chemicals that EPA has evaluated in the past to provide guidance to risk assessors and communities on their carcinogenic and reproductive toxicity potential. These can shed some light on the actions that EPA has taken previously to regulate exposures. Here we evaluate radon and lead, but other examples exist, e.g., arsenic. 
+
+### Radon
+
+Radon is a radioactive gas produced from the natural decay of uranium that is found in nearly all soils. It is the leading cause of lung cancer for non-smokers and the second leading cause of lung cancer for the general population. 
+Average estimated concentration of radon in outdoor air is 0.4 picacuries per liter (pCi/L). Indoor air levels in the US are around 1.3 pCi/L, which according to EPA are expected to lead to approximately 21,000 radon-related lung cancers a year. This is equivalent to a unit lung cancer risk of 0.0046% or 0.000046 per pCi/L—every pCi/L of exposure is expected to increase cancer risk by 46 additional lung cancers per million people.  
+
+::: {.column-margin}
+
+Using estimated US population of 350 million, 
+$$ \frac {21,000}{350 \times 10^6} \times \frac{1}{1.3 pCi/L}  $$
+
+:::
+
+At the typical one in a million cancer risk threshold, this would lead to radon exposure concentration of approximately 0.022 pCi/L, but EPA has set an action level at 4 pCi/L—above this level, EPA recommends that the homeowner get remediation. The action level is an order of magnitude higher than ambient air and is expected to lead to approximately 2 additional cancers per 10,000 people. In other words, for radon, EPA has set a risk management threshold at one per 10,000 as opposed to one per million. The reason for this is the ubiquity of radon in the environment. A lower action level, e.g., at the one in a million threshold (0.02 pCi/L) or at ambient air concentration (0.4 pCi/L), would lead to an impossible risk management task—nearly every house in the US would need remediation. Considering the realistic (and possibly technological) feasibility, EPA set an action level for radon at one per 10,000 threshold. 
+
+For EtO, this would equate to a risk management concentration of 0.002 µg/m<sup>3</sup> as opposed to the two orders of magnitude lower concentration (0.00002 µg/m<sup>3</sup>) at one in a million threshold used by EPA for NATA and AirToxScreen. This is still greater than two 100 times lower than ambient air but much more feasible for risk management and for regulating industrial emissions.
+
+### Lead
+
+Another widely distributed and naturally occurring contaminant is lead. It is found in earth’s crust and is [naturally present in the soil](https://www.epa.gov/lead/learn-about-lead) at levels ranging from 50 to 400 parts per million (ppm). Lead is associated with a variety of health effects including neurodevelopmental effects, behavioral issues, reproductive problems, and possibly cancer.  
+
+[EPA’s standard for lead](https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-D) in bare soils in play areas is 400 ppm and 1,200 ppm for non-play areas. This is at the upper end of naturally occurring levels for hand-to-mouth exposure in children even though the prevalent thought, agreed upon by EPA, CDC, and other agencies, is that there is no safe level of lead in children's blood. Part of the rationale for setting the standard at 400 ppm is the cleanup and remediation feasibility. Below this level, it would cause alarm in the population and the resultant risk mitigation would be unfeasible. 
+
+## Conclusion
+
+EPA is currently evaluating cancer risk for EtO at the one in a million threshold. However, at this level, any contribution of emissions above 0.00002 µg/m<sup>3</sup> would lead to an elevated cancer risk. This is approximately 10,000 times lower (~ 0.007%) than the average ambient air (or background) levels around the US of approximately 0.297 µg/m<sup>3</sup>.
+
+The biological plausibility of elevated cancer risk at this small fraction aside, it provides no realistic framework for a risk assessor to evaluate risks from EtO exposure. It may not even be possible for a facility to reduce emissions that would result in these levels given current control technologies. 
+
+Considering EPA’s approach in the past for other naturally occurring chemicals, we think that assessing elevated risk at 10<sup>-4</sup> may be more realistic. This corresponds to a concentration of 0.002 µg/m<sup>3</sup>, which is two orders of magnitude higher than the 10<sup>-6</sup> threshold but still greater than two orders of magnitude lower than ambient air. 
