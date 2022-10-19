@@ -1,12 +1,13 @@
----
-title: "Steenland 2004 - Mortality analyses in a cohort of 18,235 ethylene oxide ..."
-author: "FK"
-date: "2022-10-19"
----
+# ---
+# title: "Steenland 2004 - Mortality analyses in a cohort of 18,235 ethylene oxide ..."
+# author: "FK"
+# date: "2022-10-19"
+# ---
 
   
 library(tidyverse)
 library(here)
+library(RColorBrewer)
 
 ggtheme <- theme_bw() + 
   theme(panel.grid.major = element_blank(), #element_line(color = "gray30", linetype = "solid"), 
@@ -40,26 +41,33 @@ table6 <- tribble(~No, ~model, ~category, ~OR, ~OR.L, ~OR.U,
                   5, "Males, 15 year lag", "13500+ ppm-day", 3.42, 1.09, 10.73)
 
 table6 <- table6 %>% 
-  mutate(model_cat = paste(model, category, sep = "-"))
+  mutate(model_cat = paste(model, category, sep = "-"),
+         sig = ifelse(OR.U < 1 , 15, #15-prtc
+                      ifelse((OR.L<=1 & OR.U>=1), 0, 15)), #0-null #15-sigpos
+         sig = as.integer(sig))
 
 catz <- unique(table6$model_cat)
 
 table6 <- table6 %>% 
   mutate(model_cat = factor(model_cat, levels = catz))
 
+plot.col <- c(brewer.pal(n = 3, "Set1")[1:3])
+
 ggplot(data = table6, aes(y = OR, ymin = OR.L, ymax = OR.U, x = model_cat)) + 
   geom_hline(yintercept = 1, linetype = 2, color = "gray30") +
   geom_errorbar(aes(ymin = OR.L, ymax = OR.U, col = model),
                 width = 0.5, cex = 1, show.legend = F) +
-  geom_point(aes(y = OR, x = model_cat, color = model), 
+  geom_point(aes(y = OR, x = model_cat, color = model, shape = sig), 
              size = 5, show.legend = F) +
-  annotate("text", x = 2.5, y = 10, label = "Females", size = 5) +
+  annotate("text", x = 2.5, y = 10.75, label = "Females", size = 5) +
   geom_vline(aes(xintercept = 4.5)) +
-  annotate("text", x = 6.5, y = 10, label = "Males", size = 5) +
+  annotate("text", x = 6.5, y = 10.75, label = "Males", size = 5) +
   geom_vline(aes(xintercept = 8.5)) +
-  annotate("text", x = 11, y = 10, label = "Males, 15 year lag", size = 5) +
+  annotate("text", x = 11, y = 10.75, label = "Males, 15 year lag", size = 5) +
   scale_x_discrete(labels =  table6$category) +
-  scale_y_continuous(breaks = seq(0,11,1)) +
+  scale_y_continuous(breaks = seq(0,12,2)) +
+  scale_color_manual(values = plot.col) +
+  scale_shape_identity() +
   labs(x = "",
        y = "Odds ratio",
        title = "Cox regression results for all haematopoietic cancer mortality")+
@@ -88,18 +96,23 @@ table7 <- tribble(~model, ~category, ~OR, ~OR.L, ~OR.U,
                   "Males, 15 year lag", "13500+ ppm-day", 3.76, 1.03, 13.64)
 
 table7 <- table7 %>% 
-  mutate(model_cat = paste(model, category, sep = "-"))
+  mutate(model_cat = paste(model, category, sep = "-"),
+         sig = ifelse(OR.U < 1 , 15, #15-prtc
+                      ifelse((OR.L<=1 & OR.U>=1), 0, 15)), #0-null #15-sigpos
+         sig = as.integer(sig))
 
 catz <- unique(table7$model_cat)
 
 table7 <- table7 %>% 
   mutate(model_cat = factor(model_cat, levels = catz))
 
+plot.col <- c(brewer.pal(n = 3, "Set1")[1:3])
+
 ggplot(data = table7, aes(y = OR, ymin = OR.L, ymax = OR.U, x = model_cat)) + 
   geom_hline(yintercept = 1, linetype = 2, color = "gray30") +
   geom_errorbar(aes(ymin = OR.L, ymax = OR.U, col = model),
-                width = 0.5, cex = 1, show.legend = F) +
-  geom_point(aes(y = OR, x = model_cat, color = model), 
+                width = 0.35, cex = 1, show.legend = F) +
+  geom_point(aes(y = OR, x = model_cat, color = model, shape = sig), 
              size = 5, show.legend = F) +
   annotate("text", x = 2.5, y = 13.5, label = "Females", size = 5) +
   geom_vline(aes(xintercept = 4.5)) +
@@ -107,7 +120,9 @@ ggplot(data = table7, aes(y = OR, ymin = OR.L, ymax = OR.U, x = model_cat)) +
   geom_vline(aes(xintercept = 8.5)) +
   annotate("text", x = 11, y = 13.5, label = "Males, 15 year lag", size = 5) +
   scale_x_discrete(labels =  table7$category) +
-  scale_y_continuous(breaks = seq(0,14,1)) +
+  scale_y_continuous(breaks = seq(0,14,2)) +
+  scale_color_manual(values = plot.col) +
+  scale_shape_identity() +
   labs(x = "",
        y = "Odds ratio",
        title = "Cox regression results for lymphoid cell line tumours")+
