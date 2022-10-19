@@ -53,3 +53,9 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Data
+/data/
+/output/
+/notes/
+/literature/
