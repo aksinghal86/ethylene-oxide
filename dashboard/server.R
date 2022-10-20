@@ -80,29 +80,7 @@ server <- function(input, output, session) {
       )  
   })
   
-  observe({ 
-    req(input$mapdata_year)
-    req(cancer_update())
-    
-    mapdeck_update(map_id = 'map') %>%
-      clear_polygon('cancer') %>%
-      add_polygon(
-        cancer_update(),
-        fill_colour = "log_pt_cancer",
-        palette = 'orrd',
-        fill_opacity = 0.6,
-        auto_highlight = T,
-        highlight_colour = '#FFFFFF26',
-        tooltip = 'tooltip',
-        # stroke_colour = '#FFFFFF',
-        stroke_width = 50,
-        legend = F,
-        # # legend = list(fill_colour = T, stroke_colour = F),
-        update_view = F,
-        # colour_range = colourvalues::colour_values(1:6, palette = "plasma"),
-        layer_id = 'cancer'
-      )
-  })
+ 
   
   output$emissions_plot <- renderGirafe({
     req(input$site_name) 
