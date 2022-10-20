@@ -20,7 +20,7 @@ server <- function(input, output, session) {
     cancer %>%
       filter(year == input$mapdata_year) %>%
       mutate(tooltip = paste0('Census tract #: ', geoid, '<br>',
-                              'Est Exposure Concentration: ', round(ec_ppb, 4), ' ppb', '<br>',  
+                              'Est Exposure Concentration: ', round(ec_ppb, 5), ' ppb', '<br>',  
                               'Pt Cancer Risk: ', round(pt_cancer_, 1), ' per million'))
 
   }) %>%
@@ -81,6 +81,35 @@ server <- function(input, output, session) {
       )  
   })
   
+  observeEvent(input$searchSubmit, { 
+    result <- geocode_OSM(input$search)  
+
+    if (is.null(result)) { 
+      showModal(modalDialog( 
+        title = 'No results found', 
+        "The API returned zero results. Please try a different address.", 
+        easyClose = T, 
+        footer = NULL))  
+    } else { 
+      df <- data.frame(query = result$query, lat = result$coords[['y']], lon = result$coords[['x']])
+      mapdeck_update(map_id = 'map') %>% 
+        clear_scatterplot('search') %>% 
+        add_scatterplot(
+          data = df, 
+          lat = 'lat', 
+          lon = 'lon', 
+          radius = 80,
+          fill_opacity = 0.5,
+          stroke_width = 20,
+          radius_min_pixels = 5, 
+          tooltip = 'query',
+          palette = 'oranges',
+          update_view = T, 
+          layer_id = 'search'
+        )
+    }
+
+  })
  
   
   output$emissions_plot <- renderGirafe({

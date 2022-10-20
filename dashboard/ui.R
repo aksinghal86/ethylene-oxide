@@ -8,13 +8,36 @@ ui <- navbarPage(
     
     # useShinyjs(), 
     # includeScript('script.js'),
-    div( tags$head(includeCSS('www/styles.css')) ),
+    div( tags$head(includeCSS('www/styles.css'), 
+                   includeScript('www/script.js')) ),
     
     div(
       class = 'outer',
       mapdeckOutput('map', width = '100%', height = '100%')
     ),
     
+    #### Search bar ####
+    # column(
+    #   9,
+    #   textInput("search", "", width = "50%", placeholder = "Enter your PubMed search here."),
+    # ),
+    # column(
+    #   2,
+    #   br(),
+    #   actionButton(
+    #     "submit",
+    #     "Search",
+    #     icon = icon("magnifying-glass"),
+    #     width = "20%",
+    #     class = "btn btn-primary"
+    #   )
+    # ), 
+    
+    absolutePanel(
+      id = 'searchbar', draggable = F, width = 1000, top = 80, left = 20,
+      div(style = 'display: inline-block;', textInput('search', label = NULL, placeholder = 'Search')), 
+      div(style = 'display: inline-block; ', actionButton('searchSubmit', 'Search', icon = icon('magnifying-glass')))
+    ),
     
     #### Map Navigation Panel ####
     absolutePanel(
