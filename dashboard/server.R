@@ -20,6 +20,7 @@ server <- function(input, output, session) {
     cancer %>%
       filter(year == input$mapdata_year) %>%
       mutate(tooltip = paste0('Census tract #: ', geoid, '<br>',
+                              'Est Exposure Concentration: ', round(ec_ppb, 4), ' ppb', '<br>',  
                               'Pt Cancer Risk: ', round(pt_cancer_, 1), ' per million'))
 
   }) %>%
@@ -113,7 +114,7 @@ server <- function(input, output, session) {
       function(x) rgb(get_color(x), maxColorValue = 255)
     }
     
-    emissions_color <- make_color_pal(c("#ff2700", "#f8fcf8", "#44ab43"), bias = 3)
+    emissions_color <- make_color_pal(c("#D35400", "#F39C12", "#F5B041", "#F9E79F", "#EAFAF1"), bias = 3)
     
     cancer_color <- function(value) { 
       case_when(
@@ -150,6 +151,9 @@ server <- function(input, output, session) {
           minWidth = 250,
           class = 'table-site-name'
         ), 
+        census_tract = colDef(
+          name = 'Census Tract'
+        ),
         emissions_source = colDef(
           name = 'Emissions Source'
         ), 

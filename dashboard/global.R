@@ -14,11 +14,13 @@ shinyOptions(cache = cachem::cache_disk("./eto-explorer-app-cache"))
 # Data files
 emissions <- read_rds('data/combined-eto.rds') 
 cancer <- st_read('data/neighbor-tracts.shp')
+iur <- 3e-3 # ug/m3 (non-adaf IUR)
 
 # latlong <- data.frame(geom(centroids(cancer)))
 cancer <- cancer %>% 
   filter(pt_cancer_ > 0) %>% 
-  mutate(log_pt_cancer = log(pt_cancer_)) 
+  mutate(log_pt_cancer = log(pt_cancer_), 
+         ec_ppb = pt_cancer_*1e-6/iur/1.8) 
   
 
 emissions_for_map <- emissions %>% 
