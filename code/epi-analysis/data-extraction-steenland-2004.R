@@ -18,7 +18,7 @@ ggtheme <- theme_bw() +
         legend.text = element_text(size = 14),
         legend.direction = "vertical",
         axis.text = element_text(size = 14), 
-        axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.text.x = element_text(angle = 45, hjust = 1),
         axis.title = element_text(size = 14, face = 'bold'),
         plot.title = element_text(size = 14, face = 'bold'), 
         plot.subtitle = element_text(size = 12))
@@ -26,19 +26,19 @@ ggtheme <- theme_bw() +
 
 # Table 6. ------------------------------------------------------------------
 table6 <- tribble(~No, ~model, ~category, ~OR, ~OR.L, ~OR.U,
-                  1, "Males", "0-1199 ppm-day", 1, 1, 1,
-                  2, "Males", "1200-3679 ppm-day", 2.07, 0.67, 6.41,
-                  3, "Males", "3680-13499 ppm-day", 2.02, 0.68, 5.98,
-                  4, "Males", "13500+ ppm-day", 2.06, 0.72, 5.91,
-                  1, "Females", "0-1199 ppm-day", 1, 1, 1,
-                  2, "Females", "1200-3679 ppm-day", 1.51, 0.69, 3.34,
-                  3, "Females", "3680-13499 ppm-day", 0.93, 0.38, 2.30,
-                  4, "Females", "13500+ ppm-day", 0.52, 0.16, 1.66,
+                  1, "Males", "0-1199", 1, 1, 1,
+                  2, "Males", "1200-3679", 2.07, 0.67, 6.41,
+                  3, "Males", "3680-13499", 2.02, 0.68, 5.98,
+                  4, "Males", "13500+", 2.06, 0.72, 5.91,
+                  1, "Females", "0-1199", 1, 1, 1,
+                  2, "Females", "1200-3679", 1.51, 0.69, 3.34,
+                  3, "Females", "3680-13499", 0.93, 0.38, 2.30,
+                  4, "Females", "13500+", 0.52, 0.16, 1.66,
                   1, "Males, 15 year lag", "0 (lagged out)", 1, 1, 1,
-                  2, "Males, 15 year lag", ">0-1199 ppm-day", 1.23, 0.32, 4.73,
-                  3, "Males, 15 year lag", "1200-3679 ppm-day", 2.52, 0.69, 9.22,
-                  4, "Males, 15 year lag", "3680-13499 ppm-day", 3.13, 0.95, 10.37,
-                  5, "Males, 15 year lag", "13500+ ppm-day", 3.42, 1.09, 10.73)
+                  2, "Males, 15 year lag", ">0-1199", 1.23, 0.32, 4.73,
+                  3, "Males, 15 year lag", "1200-3679", 2.52, 0.69, 9.22,
+                  4, "Males, 15 year lag", "3680-13499", 3.13, 0.95, 10.37,
+                  5, "Males, 15 year lag", "13500+", 3.42, 1.09, 10.73)
 
 table6 <- table6 %>% 
   mutate(model_cat = paste(model, category, sep = "-"),
@@ -68,7 +68,7 @@ ggplot(data = table6, aes(y = OR, ymin = OR.L, ymax = OR.U, x = model_cat)) +
   scale_y_continuous(breaks = seq(0,12,2)) +
   scale_color_manual(values = plot.col) +
   scale_shape_identity() +
-  labs(x = "",
+  labs(x = "Exposure (ppm-day)",
        y = "Odds ratio",
        title = "Cox regression results for all haematopoietic cancer mortality")+
   ggtheme
@@ -81,19 +81,19 @@ ggsave(here('output','plot','steenland2004-table6.jpeg'),
 
 # Table 7. ----------------------------------------------------------------
 table7 <- tribble(~model, ~category, ~OR, ~OR.L, ~OR.U,
-                  "Males", "0-1199 ppm-day", 1, 1, 1,
-                  "Males", "1200-3679 ppm-day", 2.45, 0.61, 9.92,
-                  "Males", "3680-13499 ppm-day", 1.85, 0.46, 7.48,
-                  "Males", "13500+ ppm-day", 2.44, 0.67, 8.87,
-                  "Females", "0-1199 ppm-day", 1, 1, 1,
-                  "Females", "1200-3679 ppm-day", 2.05, 0.76, 5.56,
-                  "Females", "3680-13499 ppm-day", 1.25, 0.4, 3.76,
-                  "Females", "13500+ ppm-day", 0.87, 0.24, 3.10,
+                  "Males", "0-1199", 1, 1, 1,
+                  "Males", "1200-3679", 2.45, 0.61, 9.92,
+                  "Males", "3680-13499", 1.85, 0.46, 7.48,
+                  "Males", "13500+", 2.44, 0.67, 8.87,
+                  "Females", "0-1199", 1, 1, 1,
+                  "Females", "1200-3679", 2.05, 0.76, 5.56,
+                  "Females", "3680-13499", 1.25, 0.4, 3.76,
+                  "Females", "13500+", 0.87, 0.24, 3.10,
                   "Males, 15 year lag", "0 (lagged out)", 1, 1, 1,
-                  "Males, 15 year lag", ">0-1199 ppm-day", 0.90, 0.16, 5.24,
-                  "Males, 15 year lag", "1200-3679 ppm-day", 2.89, 0.65, 12.86,
-                  "Males, 15 year lag", "3680-13499 ppm-day", 2.74, 0.65, 11.55,
-                  "Males, 15 year lag", "13500+ ppm-day", 3.76, 1.03, 13.64)
+                  "Males, 15 year lag", ">0-1199", 0.90, 0.16, 5.24,
+                  "Males, 15 year lag", "1200-3679", 2.89, 0.65, 12.86,
+                  "Males, 15 year lag", "3680-13499", 2.74, 0.65, 11.55,
+                  "Males, 15 year lag", "13500+", 3.76, 1.03, 13.64)
 
 table7 <- table7 %>% 
   mutate(model_cat = paste(model, category, sep = "-"),
@@ -123,7 +123,7 @@ ggplot(data = table7, aes(y = OR, ymin = OR.L, ymax = OR.U, x = model_cat)) +
   scale_y_continuous(breaks = seq(0,14,2)) +
   scale_color_manual(values = plot.col) +
   scale_shape_identity() +
-  labs(x = "",
+  labs(x = "Exposure (ppm-day)",
        y = "Odds ratio",
        title = "Cox regression results for lymphoid cell line tumours")+
   ggtheme
