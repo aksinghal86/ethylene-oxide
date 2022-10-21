@@ -92,19 +92,28 @@ server <- function(input, output, session) {
         footer = NULL))  
     } else { 
       df <- data.frame(query = result$query, lat = result$coords[['y']], lon = result$coords[['x']])
-      mapdeck_update(map_id = 'map') %>% 
-        clear_scatterplot('search') %>% 
+      args <- list('map', c(df$lon, df$lat), 12)
+      js_args <- jsonify::to_json(args, unbox = T)
+
+      session$sendCustomMessage(
+        'move_cam',
+        js_args
+      )
+
+      mapdeck_update(map_id = 'map') %>%
+        clear_scatterplot('search') %>%
         add_scatterplot(
-          data = df, 
-          lat = 'lat', 
-          lon = 'lon', 
-          radius = 80,
+          data = df,
+          lat = 'lat',
+          lon = 'lon',
+          radius = 100,
           fill_opacity = 0.5,
-          stroke_width = 20,
-          radius_min_pixels = 5, 
+          stroke_width = 70,
+          radius_min_pixels = 10,
+          # focus_layer = T, # This works but there is no transition compared to the JS
           tooltip = 'query',
           palette = 'oranges',
-          update_view = T, 
+          update_view = F,
           layer_id = 'search'
         )
     }
