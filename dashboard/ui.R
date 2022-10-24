@@ -32,13 +32,38 @@ ui <- navbarPage(
     #     class = "btn btn-primary"
     #   )
     # ), 
-    
-    absolutePanel(
-      id = 'searchbar', draggable = F, width = 1000, top = 80, left = 20,
-      div(style = 'display: inline-block;', textInput('search', label = NULL, placeholder = 'Search')), 
-      div(style = 'display: inline-block; ', actionButton('searchSubmit', 'Search', icon = icon('magnifying-glass')))
+    div(class = 'container', 
+      fluidRow(
+        column(
+          1, br(),
+          actionButton("opts", "", icon = icon('plus')),
+          tippy::tippy_this("opts", "More options")
+        ),
+        column(
+          9,
+          textInput("search", "", width = "100%", placeholder = "Search"),
+        ),
+        column(
+          2,
+          br(),
+          actionButton(
+            "searchSubmit",
+            "",
+            icon = icon("magnifying-glass"),
+            # width = "100%"
+          )
+        )
+      )
     ),
     
+    # absolutePanel(
+    #   actionButton("opts", "", icon = icon('plus')), 
+    #   tippy::tippy_this('opts', 'More options'), 
+    #   id = 'searchbar', draggable = F, width = 1000, top = 80, left = 20,
+    #   div(style = 'display: inline-block;', textInput('search', label = NULL, placeholder = 'Search')), 
+    #   div(style = 'display: inline-block; ', actionButton('searchSubmit', 'Search', icon = icon('magnifying-glass')))
+    # ),
+    # 
     #### Map Navigation Panel ####
     absolutePanel(
       id = 'controls', draggable = T, 
