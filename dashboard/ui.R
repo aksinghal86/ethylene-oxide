@@ -6,7 +6,7 @@ ui <- navbarPage(
   tabPanel(
     'Interactive Map', icon = icon('map'), 
     
-    useShinyjs(),
+    # useShinyjs(),
     # includeScript('script.js'),
     div( tags$head(includeCSS('www/styles.css'), 
                    includeScript('www/script.js')) ),
