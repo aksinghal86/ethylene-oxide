@@ -1,5 +1,6 @@
 ui <- navbarPage(
   'Ethylene Oxide Dashboard', 
+  windowTitle = 'Ethylene Oxide Explorer', 
   id = 'nav',
   
   ## INTERACTIVE MAP ---------------------------------------------------------
@@ -29,7 +30,7 @@ ui <- navbarPage(
                       multiple = F)
         ),
         column(7, uiOutput('searchUI')),
-        column(2, actionButton("searchSubmit", NULL, icon = icon("magnifying-glass")))
+        column(2, actionButton("searchSubmit", 'Search', icon = icon("magnifying-glass")))
       )
     ),
     
