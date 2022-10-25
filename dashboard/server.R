@@ -8,11 +8,12 @@ server <- function(input, output, session) {
     } else if (input$searchOptions == 'facility') {
       xx <- emissions_for_map %>% 
         filter(!is.na(site_name)) %>% 
-        mutate(site_name = paste0(site_name, ', ', state)) %>% 
-        distinct(site_name, eisid)
+        mutate(site_name = toupper(paste0(site_name, ', ', state))) %>% 
+        distinct(site_name, eisid) %>% 
+        arrange(site_name)
       choices <- xx$eisid
       names(choices) <- xx$site_name
-
+      
       selectizeInput('search', NULL, width = '100%', choices = c('Choose facility'='', choices))
     }
   })
