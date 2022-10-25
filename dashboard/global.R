@@ -37,21 +37,21 @@ emissions_for_plot <- emissions %>%
   mutate(n = n()) %>% 
   arrange(year) %>% 
   filter(!is.na(emissions), !is.na(eisid), n >= 2)
-top50_sites <- emissions_for_plot %>%
+top_sites <- emissions_for_plot %>%
   summarize(max_emissions = max(emissions)) %>% 
   ungroup() %>% 
   arrange(-max_emissions) %>% 
-  slice(1:50) %>% 
+  slice(1:100) %>% 
   pull(eisid)
 emissions_for_plot <- emissions_for_plot %>% 
-  filter(eisid %in% top50_sites, 
+  filter(eisid %in% top_sites, 
          !is.na(site_name)) %>% 
   mutate(site_name = str_squish(str_replace_all(toupper(site_name), '[:punct:]|PLANT|LLC|CORPORATION|CORP', '')),
          site_name = paste0(site_name, ', ', state))
 
 
 emissions_for_table <- emissions %>% 
-  filter(eisid %in% top50_sites, 
+  filter(eisid %in% top_sites, 
          !is.na(site_name),
          eisid != "16431311") %>% 
   group_by(eisid) %>% 

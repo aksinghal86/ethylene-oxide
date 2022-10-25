@@ -1,8 +1,21 @@
 server <- function(input, output, session) { 
+  
   ## INTERACTIVE MAP -----------------------------------------------------------
-  
-  
   #### Create data sets and update UI components--------------------------------
+  output$searchUI <- renderUI({ 
+    if (input$searchOptions == 'address') {
+      textInput("search", NULL, width = '100%', placeholder = "Search by address, city, coordinates, etc.")
+    } else if (input$searchOptions == 'facility') {
+      xx <- emissions_for_map %>% 
+        filter(!is.na(site_name)) %>% 
+        mutate(site_name = paste0(site_name, ', ', state)) %>% 
+        distinct(site_name, eisid)
+      choices <- xx$eisid
+      names(choices) <- xx$site_name
+
+      selectizeInput('search', NULL, width = '100%', choices = c('Choose facility'='', choices))
+    }
+  })
 
   emissions_update <- reactive({
     req(input$mapdata_year)
@@ -82,17 +95,29 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$searchSubmit, { 
-    result <- geocode_OSM(input$search)  
 
-    if (is.null(result)) { 
+    if (input$searchOptions == 'address') {
+      result <- geocode_OSM(input$search)  
+      df <- data.frame(query = result$query, 
+                       latitude = result$coords[['y']], 
+                       longitude = result$coords[['x']])
+    } else if (input$searchOptions == 'facility') {
+      df <- emissions_for_map %>% 
+        filter(eisid == input$search) %>% 
+        distinct(eisid, .keep_all = T) %>% 
+        mutate(query = paste0(site_name, ', ', state)) %>% 
+        select(query, latitude, longitude)
+    } 
+
+    if (nrow(df) == 0) { 
       showModal(modalDialog( 
         title = 'No results found', 
         "The API returned zero results. Please try a different address.", 
         easyClose = T, 
         footer = NULL))  
     } else { 
-      df <- data.frame(query = result$query, lat = result$coords[['y']], lon = result$coords[['x']])
-      args <- list('map', c(df$lon, df$lat), 12)
+      
+      args <- list('map', c(df$longitude, df$latitude), 12)
       js_args <- jsonify::to_json(args, unbox = T)
 
       session$sendCustomMessage(
@@ -104,8 +129,8 @@ server <- function(input, output, session) {
         clear_scatterplot('search') %>%
         add_scatterplot(
           data = df,
-          lat = 'lat',
-          lon = 'lon',
+          lat = 'latitude',
+          lon = 'longitude',
           radius = 100,
           fill_opacity = 0.5,
           stroke_width = 70,
@@ -120,7 +145,7 @@ server <- function(input, output, session) {
 
   })
  
-  
+  ## SUMMARY CHARTS -----------------------------------------------------------
   output$emissions_plot <- renderGirafe({
     req(input$site_name) 
     
@@ -142,6 +167,7 @@ server <- function(input, output, session) {
     )
   })
   
+  ## DATA TABLE -----------------------------------------------------------
   output$table <- renderReactable({
     site_cols <- c("site_name", "city", "state", "census_tract", "year")
     emissions_cols <- c("reported_emissions", "emissions_source") 

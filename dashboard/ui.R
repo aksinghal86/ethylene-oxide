@@ -6,7 +6,7 @@ ui <- navbarPage(
   tabPanel(
     'Interactive Map', icon = icon('map'), 
     
-    # useShinyjs(), 
+    useShinyjs(),
     # includeScript('script.js'),
     div( tags$head(includeCSS('www/styles.css'), 
                    includeScript('www/script.js')) ),
@@ -17,53 +17,23 @@ ui <- navbarPage(
     ),
     
     #### Search bar ####
-    # column(
-    #   9,
-    #   textInput("search", "", width = "50%", placeholder = "Enter your PubMed search here."),
-    # ),
-    # column(
-    #   2,
-    #   br(),
-    #   actionButton(
-    #     "submit",
-    #     "Search",
-    #     icon = icon("magnifying-glass"),
-    #     width = "20%",
-    #     class = "btn btn-primary"
-    #   )
-    # ), 
-    div(class = 'container', 
+   
+    div(
+      class = 'container', 
       fluidRow(
+        br(), 
         column(
-          1, br(),
-          actionButton("opts", "", icon = icon('plus')),
-          tippy::tippy_this("opts", "More options")
+          3,
+          selectInput('searchOptions', NULL,  
+                      choices = c('Address/Coordinates' = 'address', 'Facility name' = 'facility'), 
+                      multiple = F)
         ),
-        column(
-          9,
-          textInput("search", "", width = "100%", placeholder = "Search"),
-        ),
-        column(
-          2,
-          br(),
-          actionButton(
-            "searchSubmit",
-            "",
-            icon = icon("magnifying-glass"),
-            # width = "100%"
-          )
-        )
+        column(7, uiOutput('searchUI')),
+        column(2, actionButton("searchSubmit", NULL, icon = icon("magnifying-glass")))
       )
     ),
     
-    # absolutePanel(
-    #   actionButton("opts", "", icon = icon('plus')), 
-    #   tippy::tippy_this('opts', 'More options'), 
-    #   id = 'searchbar', draggable = F, width = 1000, top = 80, left = 20,
-    #   div(style = 'display: inline-block;', textInput('search', label = NULL, placeholder = 'Search')), 
-    #   div(style = 'display: inline-block; ', actionButton('searchSubmit', 'Search', icon = icon('magnifying-glass')))
-    # ),
-    # 
+   
     #### Map Navigation Panel ####
     absolutePanel(
       id = 'controls', draggable = T, 
