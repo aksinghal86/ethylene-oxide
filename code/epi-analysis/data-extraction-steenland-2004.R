@@ -25,7 +25,7 @@ library(RColorBrewer)
 # 
 
 
-plot_steenland <- function(dat, cat = T) { 
+plot_steenland <- function(dat, expo_cat = T) { 
   
   ggtheme <- theme_bw() +
     theme(text = element_text(size = 13), 
@@ -35,9 +35,9 @@ plot_steenland <- function(dat, cat = T) {
   
   plot.col <- c(brewer.pal(n = 3, "Dark2")[1:3])
   
-  ggplot(data = dat, aes(x = if (cat) labs else xaxis, y = OR, color = model)) + 
+  ggplot(data = dat, aes(x = if (expo_cat) labs else xaxis, y = OR, color = model)) + 
     geom_point(aes(shape = sig), size = 5, show.legend = F, alpha = 0.95) +
-    geom_errorbar(aes(ymin = OR.L, ymax = OR.U), width = 0.5, cex = 1, show.legend = F, alpha = 0.8) +
+    geom_errorbar(aes(ymin = OR.L, ymax = OR.U), width = if (expo_cat) 0.5 else 1200, cex = 1, show.legend = F, alpha = 0.8) +
     facet_wrap(~ fct_relevel(model, 'Females, no lag', 'Males, no lag', 'Males, 15 year lag'), scales = 'free_x') + 
     geom_hline(yintercept = 1, linetype = 2, color = "gray30") +
     scale_shape_identity() + 
@@ -47,11 +47,11 @@ plot_steenland <- function(dat, cat = T) {
     ggtheme
 }
 
-
-# Table 6. ------------------------------------------------------------------
 labels <- data.frame(category = c('0 (lagged out)', '0-1199', '1200-3679', '3680-13499', '13500+'), 
                      labs = c('0', 'Low', 'Medium', 'High', 'Very high'),
                      xaxis = c(0, 100, 1200, 3680, 13500))
+
+# Table 6. ------------------------------------------------------------------
 
 table6 <- tribble(~No, ~model, ~category, ~OR, ~OR.L, ~OR.U,
                   1, "Males, no lag", "0-1199", 1, 1, 1,
@@ -82,7 +82,7 @@ table6 <- table6 %>%
          labs = factor(labs, levels = c('0', 'Low', 'Medium', 'High', 'Very high')))
 
 
-plot_steenland(table6, cat = T) +
+plot_steenland(table6, expo_cat = T) +
   scale_y_continuous(n.breaks = 10) +
   labs(
     title = "Cox regression results for all haematopoietic cancer mortality", 
@@ -93,7 +93,7 @@ ggsave(here('output','plot','steenland2004-table6-cat.jpeg'),
        width = 12, height = 8, dpi = 600)
 
 
-plot_steenland(table6, cat = F) +
+plot_steenland(table6, expo_cat = F) +
   scale_y_continuous(n.breaks = 10) +
   labs(
     title = "Cox regression results for all haematopoietic cancer mortality", 
@@ -103,8 +103,6 @@ plot_steenland(table6, cat = F) +
 
 ggsave(here('output','plot','steenland2004-table6-cum.jpeg'), 
        width = 12, height = 8, dpi = 600)
-
-
 
 
 # Table 7. ----------------------------------------------------------------
@@ -137,10 +135,10 @@ table7 <- table7 %>%
          labs = factor(labs, levels = c('0', 'Low', 'Medium', 'High', 'Very high')))
 
 
-plot_steenland(table7, cat = T) +
+plot_steenland(table7, expo_cat = T) +
   scale_y_continuous(n.breaks = 10) +
   labs(
-    title = "Cox regression results for all haematopoietic cancer mortality", 
+    title = "Cox regression results for lymphoid cancer mortality", 
     subtitle = 'Data from Table 7 of Steenland et al. (2004)'    
   ) 
 
@@ -148,10 +146,10 @@ ggsave(here('output','plot','steenland2004-table7-cat.jpeg'),
        width = 12, height = 8, dpi = 600)
 
 
-plot_steenland(table7, cat = F) +
+plot_steenland(table7, expo_cat = F) +
   scale_y_continuous(n.breaks = 10) +
   labs(
-    title = "Cox regression results for all haematopoietic cancer mortality", 
+    title = "Cox regression results for lymhpoid cancer mortality", 
     subtitle = 'Data from Table 7 of Steenland et al. (2004)'    
   ) +
   scale_x_continuous(breaks = seq(0, 14000, 3000), labels = scales::comma)

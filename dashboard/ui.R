@@ -78,6 +78,8 @@ ui <- navbarPage(
     # )
   ), 
   
+  
+  ## DATA TABLE ----------------------------------------------------------
   tabPanel(
     'Data explorer', icon = icon('table'), 
     tags$p(
