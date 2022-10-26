@@ -157,9 +157,16 @@ server <- function(input, output, session) {
     plt <- ggplot(plotdata, aes(x = year, y = emissions, color = site_name)) + 
       geom_point_interactive(aes(tooltip = tooltip, data_id = site_name), size = 3) + 
       geom_textline(aes(label = site_name), size = 3, vjust = -0.5, text_smoothing = 30) +
-      labs(x = 'Year', y = 'Emissions (lbs)') +
+      labs(x = NULL, y = NULL, 
+           title = 'Ethylene Oxide Emissions (in lbs) by Year by Facility in the US', 
+           subtitle = 'Emissions data from EPA') +
       theme_bw() +
-      theme(legend.position = 'none')
+      theme(legend.position = 'none', 
+            panel.border = element_rect(color = 'grey'), 
+            panel.grid.major.x = element_blank(),
+            panel.grid.minor.x = element_blank(),
+            axis.title = element_text(size = 14), 
+            plot.title.position = 'plot')
     
     girafe(
       ggobj = plt, 

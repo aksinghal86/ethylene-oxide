@@ -93,11 +93,11 @@ ui <- navbarPage(
   ## ABOUT ---------------------------------------------------------------------
   tabPanel(
     'About', icon = icon('info'),
-    tags$p("Created by", tags$a("Ankur Singhal", href = 'https://github.com/aksinghal86', target = 'blank'), 
+    tags$p("Created by", tags$a("Ankur Singhal", href = 'https://github.com/aksinghal86', target = '_blank'), 
            "as a side project to track ethylene oxide emissions", 
            "reported by emitting facilities and the corresponding analysis done by EPA to estimate cancer rates as part of ", 
-           tags$a("Air Toxics Screen", href = "https://www.epa.gov/AirToxScreen", target = 'blank'), "(formerly named ", 
-           tags$a("NATA", href = "https://www.epa.gov/national-air-toxics-assessment", target = 'blank'), ")."), 
+           tags$a("Air Toxics Screen", href = "https://www.epa.gov/AirToxScreen", target = '_blank'), "(formerly named ", 
+           tags$a("NATA", href = "https://www.epa.gov/national-air-toxics-assessment", target = '_blank'), ")."), 
     # tags$h4("Motivation") , 
     # tags$p("EPA has so far conducted a NATA/Air Toxics Screen only for emissions data provided in 2014 and 2017. ", 
     #        "It is often useful for clients to estimate what the cancer risk may be based on emissions reported in ", 
@@ -127,6 +127,6 @@ ui <- navbarPage(
            "its assessment is also in the works. A detailed explanation of the methodology as a Medium post will be made available", 
            "when the ananlysis is complete."),
     tags$h4('Source'),
-    tags$p('The code for this dashboard is available on', tags$a('Github', href='https://github.com/ehe-analytics/energy-dashboard', target = 'blank'), '.')
+    tags$p('The code for this dashboard is available on', tags$a('Github', href='https://github.com/ehe-analytics/ethylene-oxide/tree/main/dashboard', target = '_blank'), '.')
   )
 )
