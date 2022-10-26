@@ -64,18 +64,18 @@ ui <- navbarPage(
     tags$p("Plots are interactive. Try hovering over a data point. At a later date, a link may be added to direct to the facilities website.",
            "The generated plot can also be downloaded by clicking on the download button that appears on the far top right corner when hovering above the plot."), 
     tags$br(),
-
-    selectizeInput('site_name', NULL, 
-                   choices = c('Select facilities' = '', sort(unique(emissions_for_plot$site_name))), 
-                   multiple = T, width = '50vh'), 
-    ggiraphOutput('emissions_plot')
-    
-    # tabsetPanel(
-    #   id = 'smrytabs', 
-    #   
-    #   productionUI('production', unique(production$series), unique(production$state)),
-    #   co2EmissionsUI('co2_emissions', unique(co2_emissions$state))
-    # )
+    fluidRow(
+      column(
+        3, offset = 1, 
+        selectizeInput('site_name', NULL, 
+                       choices = c('Select facilities' = '', sort(unique(emissions_for_plot$site_name))), 
+                       multiple = T, width = '100%'), 
+      ), 
+      column(
+        6,
+        ggiraphOutput('emissions_plot')
+      )
+    )
   ), 
   
   

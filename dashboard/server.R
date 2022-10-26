@@ -154,9 +154,10 @@ server <- function(input, output, session) {
       filter(site_name %in% input$site_name) %>% 
       mutate(tooltip = paste(round(emissions), 'lbs'))
     
-    plt <- ggplot(plotdata, aes(x = year, y = emissions, color = site_name)) + 
+    plt <- ggplot(plotdata, aes(x = year, y = emissions, color = site_name)) +
       geom_point_interactive(aes(tooltip = tooltip, data_id = site_name), size = 3) + 
       geom_textline(aes(label = site_name), size = 3, vjust = -0.5, text_smoothing = 30) +
+      scale_y_continuous(labels = scales::comma) + 
       labs(x = NULL, y = NULL, 
            title = 'Ethylene Oxide Emissions (in lbs) by Year by Facility in the US', 
            subtitle = 'Emissions data from EPA') +
@@ -165,7 +166,7 @@ server <- function(input, output, session) {
             panel.border = element_rect(color = 'grey'), 
             panel.grid.major.x = element_blank(),
             panel.grid.minor.x = element_blank(),
-            axis.title = element_text(size = 14), 
+            text = element_text(size = 12), 
             plot.title.position = 'plot')
     
     girafe(
