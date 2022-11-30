@@ -1,6 +1,6 @@
 # ---
 # title: "Steenland 2004 - Mortality analyses in a cohort of 18,235 ethylene oxide ..."
-# author: "FK"
+# author: "FK + AS"
 # date: "2022-10-19"
 # ---
 
@@ -8,22 +8,6 @@
 library(tidyverse)
 library(here)
 library(RColorBrewer)
-# 
-# ggtheme <- theme_bw() +
-#   theme(panel.grid.major = element_blank(), #element_line(color = "gray30", linetype = "solid"),
-#         panel.grid.minor = element_blank(),
-#         strip.text = element_text(size = 14, face = 'bold'),
-#         legend.title = element_blank(),
-#         legend.position = "bottom",
-#         legend.text = element_text(size = 14),
-#         legend.direction = "vertical",
-#         axis.text = element_text(size = 12),
-#         axis.text.x = element_text(angle = 45, hjust = 1),
-#         axis.title = element_text(size = 14, face = 'bold'),
-#         plot.title = element_text(size = 14, face = 'bold'),
-#         plot.subtitle = element_text(size = 12))
-# 
-
 
 plot_steenland <- function(dat, expo_cat = T) { 
   
@@ -53,34 +37,27 @@ labels <- data.frame(category = c('0 (lagged out)', '0-1199', '1200-3679', '3680
 
 # Table 6. ------------------------------------------------------------------
 
-table6 <- tribble(~No, ~model, ~category, ~OR, ~OR.L, ~OR.U,
-                  1, "Males, no lag", "0-1199", 1, 1, 1,
-                  2, "Males, no lag", "1200-3679", 2.07, 0.67, 6.41,
-                  3, "Males, no lag", "3680-13499", 2.02, 0.68, 5.98,
-                  4, "Males, no lag", "13500+", 2.06, 0.72, 5.91,
-                  1, "Females, no lag", "0-1199", 1, 1, 1,
-                  2, "Females, no lag", "1200-3679", 1.51, 0.69, 3.34,
-                  3, "Females, no lag", "3680-13499", 0.93, 0.38, 2.30,
-                  4, "Females, no lag", "13500+", 0.52, 0.16, 1.66,
-                  1, "Males, 15 year lag", "0 (lagged out)", 1, 1, 1,
-                  2, "Males, 15 year lag", "0-1199", 1.23, 0.32, 4.73,
-                  3, "Males, 15 year lag", "1200-3679", 2.52, 0.69, 9.22,
-                  4, "Males, 15 year lag", "3680-13499", 3.13, 0.95, 10.37,
-                  5, "Males, 15 year lag", "13500+", 3.42, 1.09, 10.73) %>% 
+table6 <- tribble(~model, ~category, ~OR, ~OR.L, ~OR.U,
+                  "Males, no lag", "0-1199", 1, 1, 1,
+                  "Males, no lag", "1200-3679", 2.07, 0.67, 6.41,
+                  "Males, no lag", "3680-13499", 2.02, 0.68, 5.98,
+                  "Males, no lag", "13500+", 2.06, 0.72, 5.91,
+                  "Females, no lag", "0-1199", 1, 1, 1,
+                  "Females, no lag", "1200-3679", 1.51, 0.69, 3.34,
+                  "Females, no lag", "3680-13499", 0.93, 0.38, 2.30,
+                  "Females, no lag", "13500+", 0.52, 0.16, 1.66,
+                  "Males, 15 year lag", "0 (lagged out)", 1, 1, 1,
+                  "Males, 15 year lag", "0-1199", 1.23, 0.32, 4.73,
+                  "Males, 15 year lag", "1200-3679", 2.52, 0.69, 9.22,
+                  "Males, 15 year lag", "3680-13499", 3.13, 0.95, 10.37,
+                  "Males, 15 year lag", "13500+", 3.42, 1.09, 10.73) %>% 
   left_join(labels, by = 'category')
 
 table6 <- table6 %>% 
-  mutate(model_cat = paste(model, category, sep = "-"),
-         sig = ifelse(OR.U < 1 , 15, #15-prtc
+  mutate(sig = ifelse(OR.U < 1 , 15, #15-prtc
                       ifelse((OR.L<=1 & OR.U>=1), 0, 15)), #0-null #15-sigpos
-         sig = as.integer(sig))
-
-catz <- unique(table6$model_cat)
-
-table6 <- table6 %>% 
-  mutate(model_cat = factor(model_cat, levels = catz), 
+         sig = as.integer(sig),
          labs = factor(labs, levels = c('0', 'Low', 'Medium', 'High', 'Very high')))
-
 
 plot_steenland(table6, expo_cat = T) +
   scale_y_continuous(n.breaks = 10) +
@@ -123,17 +100,10 @@ table7 <- tribble(~model, ~category, ~OR, ~OR.L, ~OR.U,
   left_join(labels, by = 'category') 
 
 table7 <- table7 %>%
-  mutate(model_cat = paste(model, category, sep = "-"),
-         sig = ifelse(OR.U < 1 , 15, #15-prtc
+  mutate(sig = ifelse(OR.U < 1 , 15, #15-prtc
                       ifelse((OR.L<=1 & OR.U>=1), 0, 15)), #0-null #15-sigpos
-         sig = as.integer(sig))
-
-catz <- unique(table7$model_cat)
-
-table7 <- table7 %>% 
-  mutate(model_cat = factor(model_cat, levels = catz), 
+         sig = as.integer(sig),
          labs = factor(labs, levels = c('0', 'Low', 'Medium', 'High', 'Very high')))
-
 
 plot_steenland(table7, expo_cat = T) +
   scale_y_continuous(n.breaks = 10) +
