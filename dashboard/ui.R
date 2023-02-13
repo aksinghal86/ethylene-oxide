@@ -93,8 +93,8 @@ ui <- navbarPage(
   ## ABOUT ---------------------------------------------------------------------
   tabPanel(
     'About', icon = icon('info'),
-    tags$p("Created by", tags$a("Ankur Singhal", href = 'https://github.com/aksinghal86', target = '_blank'), 
-           "as a side project to track ethylene oxide emissions", 
+    tags$p("Created by", tags$a("Ankur Singhal", href = 'https://ankursinghal.me/', target = '_blank'), 
+           "to track ethylene oxide emissions", 
            "reported by emitting facilities and the corresponding analysis done by EPA to estimate cancer rates as part of ", 
            tags$a("Air Toxics Screen", href = "https://www.epa.gov/AirToxScreen", target = '_blank'), "(formerly named ", 
            tags$a("NATA", href = "https://www.epa.gov/national-air-toxics-assessment", target = '_blank'), ")."), 
